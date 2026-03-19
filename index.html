@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>M_MAGI OMD 슈퍼보드: 이노치노하하 유니버스 에디션</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+		
+		body { 
+			font-family: 'Pretendard', sans-serif; 
+		}
+		
+		/* 1. 기본 커스텀 애니메이션 */
+		@keyframes slideIn { 
+			from { opacity: 0; transform: translateY(15px); } 
+			to { opacity: 1; transform: translateY(0); } 
+		}
+		.animate-slide-in { 
+			animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+			opacity: 0; 
+		}
+		
+		@keyframes pulse-soft {
+			0%, 100% { opacity: 1; }
+			50% { opacity: 0.8; }
+		}
+		.animate-pulse-soft {
+			animation: pulse-soft 2s infinite;
+		}
+		
+		/* 2. 버튼 Shine 이펙트 */
+		@keyframes shine {
+			0% { left: -100%; }
+			100% { left: 200%; }
+		}
+		.btn-shine { 
+			position: relative; 
+			overflow: hidden; 
+		}
+		.btn-shine::after {
+			content: ''; 
+			position: absolute; 
+			top: 0; 
+			left: -100%; 
+			width: 50%; 
+			height: 100%;
+			background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+			transform: skewX(-20deg);
+		}
+		.btn-shine:hover::after { 
+			animation: shine 1.5s infinite; 
+		}
+		
+		/* 3. 사용자 지정 얇은 스크롤바 */
+		::-webkit-scrollbar { width: 6px; }
+		::-webkit-scrollbar-track { background: transparent; }
+		::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+		::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+		/* 4. 세일즈 스크립트 Hover 툴팁 (Widget D 전용) */
+		.sales-tooltip {
+			position: absolute;
+			bottom: 100%;
+			left: 50%;
+			transform: translateX(-50%) translateY(10px);
+			background-color: #1e293b;
+			color: #f8fafc;
+			padding: 0.875rem 1rem;
+			border-radius: 0.75rem;
+			font-size: 0.8125rem;
+			font-weight: 500;
+			width: 280px;
+			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			z-index: 50;
+			pointer-events: none;
+			line-height: 1.5;
+			border: 1px solid #334155;
+		}
+		.sales-tooltip::after {
+			content: '';
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			transform: translateX(-50%);
+			border-width: 7px;
+			border-style: solid;
+			border-color: #334155 transparent transparent transparent;
+		}
+		/* Hover 트리거 */
+		.tooltip-trigger:hover .sales-tooltip {
+			opacity: 1;
+			visibility: visible;
+			transform: translateX(-50%) translateY(-10px);
+		}
+	</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+	<!-- 1. Top Bar: 환자 통합 컨텍스트 및 복약 주기 알림 -->
+	<header class="bg-[#1A2B4C] text-white p-4 shadow-lg sticky top-0 z-50 border-b border-slate-700">
+		<div class="max-w-7xl mx-auto flex flex-col gap-3">
+			<!-- Top Info Row -->
+			<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+				
+				<!-- Status & Profile -->
+				<div class="flex items-center gap-3 bg-slate-800/80 py-2 px-4 rounded-lg border border-slate-600 shadow-inner text-sm sm:text-base w-full lg:w-auto overflow-x-auto whitespace-nowrap scrollbar-hide shrink-0">
+					<span class="flex items-center gap-2 font-bold text-green-400">
+						<span class="relative flex h-3 w-3">
+							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+							<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+						</span>
+						진료중
+					</span>
+					<div class="w-px h-4 bg-slate-600"></div>
+					<span class="font-mono tracking-widest text-slate-200">ID 3040F</span>
+					<div class="w-px h-4 bg-slate-600"></div>
+					<span>여성</span>
+					<div class="w-px h-4 bg-slate-600"></div>
+					<span>37세</span>
+					<div class="w-px h-4 bg-slate-600"></div>
+					<span class="bg-blue-600/50 text-blue-100 border border-blue-500 px-2 py-0.5 rounded text-sm font-semibold">내원 2회차</span>
+				</div>
+
+				<!-- Diagnosis & Tags -->
+				<div class="flex items-center gap-2 flex-1 w-full lg:w-auto flex-wrap">
+					<span class="font-extrabold text-lg text-yellow-300">기능성 소화불량 (K30)</span>
+					<span class="text-slate-400 mx-1">➕</span>
+					<span class="text-sm text-slate-300 mr-1 font-semibold whitespace-nowrap">M_MAGI 임상 태그:</span>
+					<span class="bg-indigo-900/50 text-indigo-200 px-2 py-1 rounded-md text-xs sm:text-sm border border-indigo-700 shadow-sm">#야간발한</span>
+					<span class="bg-pink-900/50 text-pink-200 px-2 py-1 rounded-md text-xs sm:text-sm border border-pink-700 shadow-sm">#감정기복</span>
+					<span class="bg-orange-900/50 text-orange-200 px-2 py-1 rounded-md text-xs sm:text-sm border border-orange-700 shadow-sm">#어지럼증</span>
+				</div>
+
+				<!-- History & Feedback -->
+				<div class="flex flex-col gap-1 text-sm text-left lg:text-right w-full lg:w-auto shrink-0">
+					<div class="text-slate-300">
+						<span class="font-semibold text-white">최근 1년 침/물리치료 총 12회</span> (주로 경추/요추)
+					</div>
+					<div class="flex items-center lg:justify-end gap-2 flex-wrap">
+						<span class="bg-slate-700 px-2 py-0.5 rounded text-xs font-bold text-slate-200">상세 호전도</span>
+						<span class="text-green-300 font-medium">피로감 개선[VAS 8 → 4]</span>
+						<span class="text-slate-500 hidden sm:inline">|</span>
+						<span class="text-orange-300 font-medium">야간 발한 및 갑작스러운 두근거림 증상 잔존</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Alert Banner (복약 주기 알림 - 옅은 붉은색 강조 박스) -->
+			<div class="bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl p-3 sm:p-4 flex items-center justify-between border border-red-400 shadow-[0_4px_15px_rgba(225,29,72,0.3)]">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="bg-white rounded-full p-2 flex items-center justify-center shadow-sm shrink-0">
+						<span class="text-2xl animate-pulse-soft leading-none">🚨</span>
+					</div>
+					<div>
+						<div class="font-bold text-red-100 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+							이전 처방: 보중익기탕 (15일분 / 24.11.05 처방)
+							<span class="bg-white text-red-600 px-2.5 py-0.5 rounded border border-red-200 text-xs sm:text-sm font-black tracking-tight shadow-sm whitespace-nowrap">잔여 복약일: [ D-0 ] (오늘 처방약 전량 소진!)</span>
+						</div>
+						<div class="text-[15px] sm:text-[17px] font-extrabold mt-1 tracking-tight">
+							원장님 알림: "치료 단절을 막기 위한 재처방 및 여성 호르몬 케어 교차 처방 골든타임입니다."
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Main Grid Content (반응형: 모바일 1단, PC 2단 / 중앙 정렬 max-w-7xl) -->
+	<main class="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto">
+		
+		<!-- ========================================== -->
+		<!-- 2. Widget A: MAGI 디바이스 라이프로그 (초고도화) -->
+		<!-- ========================================== -->
+		<div class="bg-white rounded-xl shadow-md p-5 sm:p-6 flex flex-col border border-slate-200 animate-slide-in hover:shadow-lg transition-shadow" style="animation-delay: 0.1s;">
+			<h2 class="text-[#1A2B4C] font-extrabold text-lg sm:text-xl mb-5 flex items-center gap-2 pb-3 border-b border-slate-100 shrink-0">
+				<span class="bg-indigo-100 p-1.5 rounded-lg text-indigo-600 leading-none">⌚</span> 
+				MAGI 디바이스 연동 라이프로그 리포트
+			</h2>
+			
+			<!-- 주간 생체 지표 요약 (가로 나열 방지 -> 세로 정렬 구조) -->
+			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 shrink-0">
+				<!-- 1 -->
+				<div class="bg-slate-50 border border-slate-200 rounded-lg p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 transition-colors hover:bg-slate-100">
+					<div class="text-xs text-slate-500 font-bold">수면 효율</div>
+					<div class="text-2xl font-black text-slate-800 leading-none">58<span class="text-sm font-medium ml-0.5">점</span></div>
+					<div class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded whitespace-nowrap">전월 대비 -15점 🔻</div>
+				</div>
+				<!-- 2 -->
+				<div class="bg-slate-50 border border-slate-200 rounded-lg p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 transition-colors hover:bg-slate-100">
+					<div class="text-xs text-slate-500 font-bold">깊은 수면</div>
+					<div class="text-2xl font-black text-slate-800 leading-none">12<span class="text-sm font-medium ml-0.5">%</span></div>
+					<div class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded whitespace-nowrap">정상 20% 미달 ⚠️</div>
+				</div>
+				<!-- 3 -->
+				<div class="bg-slate-50 border border-slate-200 rounded-lg p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 transition-colors hover:bg-slate-100">
+					<div class="text-xs text-slate-500 font-bold">휴식기 심박수</div>
+					<div class="text-2xl font-black text-slate-800 leading-none">82<span class="text-sm font-medium ml-0.5">bpm</span></div>
+					<div class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded whitespace-nowrap">평소 대비 급상승 🔺</div>
+				</div>
+				<!-- 4 -->
+				<div class="bg-slate-50 border border-slate-200 rounded-lg p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 transition-colors hover:bg-slate-100">
+					<div class="text-xs text-slate-500 font-bold">야간 피부온도</div>
+					<div class="text-2xl font-black text-slate-800 leading-none">+1.2<span class="text-sm font-medium ml-0.5">℃</span></div>
+					<div class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded whitespace-nowrap">발한 트리거 ⚠️</div>
+				</div>
+			</div>
+
+			<!-- 섹션 1: 원장님 필수 질문 프롬프터 (Top 1 처방용) -->
+			<div class="flex flex-col gap-4 mb-6 shrink-0">
+				<!-- D-3 로그 프롬프터 -->
+				<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden group">
+					<div class="absolute top-0 left-0 bg-slate-600 text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-10">D-3 로그</div>
+					
+					<div class="mt-3 text-xs flex flex-wrap gap-1.5 items-center mb-3">
+						<span class="font-bold text-slate-500">Trigger:</span>
+						<span class="text-slate-700 font-bold bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm">피부온도 +1.5도 스파이크 3회 + Awake 45분</span>
+						<span class="text-slate-400 font-bold px-0.5">➡️</span>
+						<span class="text-[10px] font-bold text-slate-600 bg-slate-200 px-1.5 py-0.5 rounded">#야간발한</span>
+						<span class="text-slate-400 font-bold px-0.5">➡️</span>
+						<span class="font-extrabold text-pink-700 bg-pink-100 px-1.5 py-0.5 rounded border border-pink-200">[당사 PB-A]</span>
+					</div>
+
+					<!-- Prompter Box -->
+					<div class="bg-gradient-to-br from-[#2e3b5e] to-[#1A2B4C] rounded-lg p-3.5 text-white shadow-md border border-indigo-900 relative">
+						<div class="text-[10px] font-black text-indigo-300 mb-1.5 flex items-center gap-1 tracking-wider uppercase">
+							<span class="text-red-400 animate-pulse">🔴</span> 원장님 필수 질문 (ON-AIR)
+						</div>
+						<div class="text-[14px] sm:text-[15px] font-bold leading-relaxed tracking-tight">
+							"환자님, 새벽 2시경 체온이 오르며 깊은 수면에서 깨셨네요. 자다가 갑자기 덥거나 땀이 훅 나서 깨시죠?"
+						</div>
+					</div>
+				</div>
+
+				<!-- D-1 로그 프롬프터 -->
+				<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden group">
+					<div class="absolute top-0 left-0 bg-slate-600 text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-10">D-1 로그</div>
+					
+					<div class="mt-3 text-xs flex flex-wrap gap-1.5 items-center mb-3">
+						<span class="font-bold text-slate-500">Trigger:</span>
+						<span class="text-slate-700 font-bold bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm">안정시 심박수(RHR) 스파이크 + 스트레스 지수(HRV) 높음</span>
+						<span class="text-slate-400 font-bold px-0.5">➡️</span>
+						<span class="text-[10px] font-bold text-slate-600 bg-slate-200 px-1.5 py-0.5 rounded">#자율신경교란</span>
+						<span class="text-slate-400 font-bold px-0.5">➡️</span>
+						<span class="font-extrabold text-pink-700 bg-pink-100 px-1.5 py-0.5 rounded border border-pink-200">[당사 PB-A]</span>
+					</div>
+
+					<!-- Prompter Box -->
+					<div class="bg-gradient-to-br from-[#2e3b5e] to-[#1A2B4C] rounded-lg p-3.5 text-white shadow-md border border-indigo-900 relative">
+						<div class="text-[10px] font-black text-indigo-300 mb-1.5 flex items-center gap-1 tracking-wider uppercase">
+							<span class="text-red-400 animate-pulse">🔴</span> 원장님 필수 질문 (ON-AIR)
+						</div>
+						<div class="text-[14px] sm:text-[15px] font-bold leading-relaxed tracking-tight">
+							"쉬고 계실 때도 심박수가 빠르게 뛰는 구간이 있습니다. 이유 없이 가슴이 두근거리거나 감정이 예민해지진 않으셨나요?"
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 섹션 2: 상관관계 차트 -->
+			<div class="mt-auto bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200 flex flex-col justify-center relative shadow-inner min-h-[160px]">
+				<div class="text-[13px] sm:text-sm font-extrabold text-[#1A2B4C] mb-3 flex items-center justify-between z-10 flex-wrap gap-2">
+					<span>📈 복약 여부 vs 생체 지표 상관관계</span>
+					<div class="flex items-center gap-3 text-xs">
+						<span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-100 border border-blue-300"></span>복약 기간</span>
+						<span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-green-500"></span>지표 안정성</span>
+					</div>
+				</div>
+				
+				<div class="relative w-full h-28 bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+					<svg viewBox="0 0 100 50" preserveAspectRatio="none" class="w-full h-full">
+						<!-- 파란색 옅은 음영 박스 (약을 복용한 기간 D-14 ~ D-7) -->
+						<rect x="0" y="0" width="50" height="50" fill="rgba(59, 130, 246, 0.08)" />
+						<!-- 세로 구분선 -->
+						<line x1="50" y1="0" x2="50" y2="50" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="2" />
+						<!-- 가로 그리드 선 -->
+						<line x1="0" y1="15" x2="100" y2="15" stroke="#f1f5f9" stroke-width="0.5" />
+						<line x1="0" y1="35" x2="100" y2="35" stroke="#f1f5f9" stroke-width="0.5" />
+						
+						<!-- 꺾은선 그래프 -->
+						<path d="M0,25 C15,20 35,28 50,25" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" />
+						<path d="M50,25 C65,22 85,45 100,45" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" />
+						
+						<!-- 데이터 포인트 -->
+						<circle cx="25" cy="23" r="2.5" fill="#10b981" />
+						<circle cx="50" cy="25" r="2.5" fill="#10b981" />
+						<circle cx="75" cy="35" r="2.5" fill="#ef4444" />
+						<circle cx="100" cy="45" r="2.5" fill="#ef4444" />
+					</svg>
+
+					<!-- 차트 하단 X축 라벨 -->
+					<div class="absolute bottom-1 w-full flex justify-between px-2 text-[10px] font-bold text-slate-400">
+						<span class="w-[50%]">D-14</span>
+						<span class="w-[25%] -ml-4 text-center">D-7 (약 중단)</span>
+						<span class="w-[25%] text-right text-red-400">D-0 (현재)</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ========================================== -->
+		<!-- 3. Widget B: 글로벌 생동성(BE) 및 논문 수치 -->
+		<!-- ========================================== -->
+		<!-- 제약사항 적용: 여백 없이 꽉 채우기, Top(개선율) -> Middle(빅데이터) -> Bottom(인증마크 3종) 순서 -->
+		<div class="bg-white rounded-xl shadow-md p-5 sm:p-6 flex flex-col justify-between border border-slate-200 animate-slide-in hover:shadow-lg transition-shadow" style="animation-delay: 0.2s;">
+			<h2 class="text-[#1A2B4C] font-extrabold text-lg sm:text-xl mb-5 flex items-center gap-2 pb-3 border-b border-slate-100 shrink-0">
+				<span class="bg-yellow-100 p-1.5 rounded-lg text-yellow-600 leading-none">🌍</span> 
+				M_MAGI 글로벌 처방 근거 <span class="text-sm text-slate-500 font-semibold ml-1 hidden sm:inline">(코바야시 제약 기반)</span>
+			</h2>
+
+			<!-- [Top 1단: 논문 기반 실 개선율] -->
+			<div class="flex flex-col gap-2.5 mb-5 shrink-0">
+				<div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 hover:border-pink-300 hover:shadow-md transition-all gap-2 sm:gap-0">
+					<span class="font-extrabold text-slate-700 flex items-center gap-2.5 text-sm sm:text-base">
+						<span class="bg-pink-100 text-pink-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-inner shrink-0">✓</span>
+						갱년기 안면홍조/발한 개선율
+					</span>
+					<div class="text-left sm:text-right flex items-baseline gap-1.5 pl-8 sm:pl-0">
+						<span class="text-2xl sm:text-[26px] font-black text-pink-600 tracking-tighter">82.4%</span>
+						<span class="text-xs text-slate-400 font-bold">(N=428명)</span>
+					</div>
+				</div>
+				
+				<div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all gap-2 sm:gap-0">
+					<span class="font-extrabold text-slate-700 flex items-center gap-2.5 text-sm sm:text-base">
+						<span class="bg-blue-100 text-blue-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-inner shrink-0">✓</span>
+						월경 전 증후군(PMS)/복통 개선율
+					</span>
+					<div class="text-left sm:text-right flex items-baseline gap-1.5 pl-8 sm:pl-0">
+						<span class="text-2xl sm:text-[26px] font-black text-blue-600 tracking-tighter">85.3%</span>
+						<span class="text-xs text-slate-400 font-bold">(N=512명)</span>
+					</div>
+				</div>
+
+				<div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all gap-2 sm:gap-0">
+					<span class="font-extrabold text-slate-700 flex items-center gap-2.5 text-sm sm:text-base">
+						<span class="bg-emerald-100 text-emerald-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-inner shrink-0">✓</span>
+						수족냉증/말초 혈행 개선율
+					</span>
+					<div class="text-left sm:text-right flex items-baseline gap-1.5 pl-8 sm:pl-0">
+						<span class="text-2xl sm:text-[26px] font-black text-emerald-600 tracking-tighter">79.1%</span>
+						<span class="text-xs text-slate-400 font-bold">(N=315명)</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- [Middle 2단: 압도적 데이터 스케일] -->
+			<div class="text-center bg-slate-50 rounded-2xl p-6 sm:p-8 mb-5 border border-slate-200 shadow-inner relative overflow-hidden flex-1 flex flex-col justify-center">
+				<div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent"></div>
+				<div class="relative z-10">
+					<div class="text-[13px] sm:text-sm font-extrabold text-slate-500 mb-2 tracking-widest uppercase">총 확보 학술 논문 및 임상</div>
+					<div class="text-6xl sm:text-[80px] leading-none font-black text-[#1A2B4C] tracking-tighter drop-shadow-sm my-2">
+						17,418<span class="text-2xl sm:text-4xl font-bold text-slate-400 tracking-normal ml-1">건</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- [Bottom 3단: 핵심 학술 인증 마크 3종] -->
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">
+				<!-- 1. PMDA -->
+				<div class="bg-gradient-to-br from-[#FFFAEB] to-[#FFF4D6] border border-[#FDE68A] rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 hover:-translate-y-1 transition-transform cursor-default">
+					<div class="text-3xl drop-shadow-sm leading-none">🏆</div>
+					<div class="font-black text-yellow-900 text-[13px]">PMDA 승인</div>
+					<div class="text-[10px] font-bold text-yellow-800 bg-white/60 px-2 py-0.5 rounded leading-tight w-full">일본 후생성<br>생동성 100%</div>
+				</div>
+				<!-- 2. SCI -->
+				<div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 hover:-translate-y-1 transition-transform cursor-default">
+					<div class="text-3xl drop-shadow-sm leading-none">🌍</div>
+					<div class="font-black text-blue-900 text-[13px]">SCI급 등재</div>
+					<div class="text-[10px] font-bold text-blue-800 bg-white/60 px-2 py-0.5 rounded leading-tight w-full">국제 학술지<br>약리 기전 검증</div>
+				</div>
+				<!-- 3. KCI -->
+				<div class="bg-gradient-to-br from-slate-50 to-gray-100 border border-slate-200 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center text-center gap-1.5 hover:-translate-y-1 transition-transform cursor-default">
+					<div class="text-3xl drop-shadow-sm leading-none">🇰🇷</div>
+					<div class="font-black text-slate-800 text-[13px]">KCI 등재</div>
+					<div class="text-[10px] font-bold text-slate-600 bg-white/60 px-2 py-0.5 rounded leading-tight w-full">국내 우수 학회지<br>임상 확보</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ========================================== -->
+		<!-- 4. Widget C: 환자 라뽀 형성을 위한 미병 심층 분석 -->
+		<!-- ========================================== -->
+		<div class="bg-white rounded-xl shadow-md p-5 sm:p-6 flex flex-col border border-slate-200 animate-slide-in hover:shadow-lg transition-shadow" style="animation-delay: 0.3s;">
+			<h2 class="text-[#1A2B4C] font-extrabold text-lg sm:text-xl mb-4 flex items-center gap-2 pb-3 border-b border-slate-100 shrink-0">
+				<span class="bg-teal-100 p-1.5 rounded-lg text-teal-600 leading-none">🔍</span> 
+				여성 맞춤형 미병(ME-BYO) 심층 분석
+			</h2>
+
+			<!-- M_MAGI 미병 지수 스케일 바 UI 개선 (겹침 완벽 방지) -->
+			<!-- mt-12를 주어 상단 말풍선이 위치할 충분한 공간 확보 -->
+			<div class="relative mt-12 mb-6 px-2">
+				<!-- 핀과 점수는 바 위쪽에 절대 배치 -->
+				<div class="absolute -top-10 transition-all duration-1000 ease-out z-10" style="left: 68%; transform: translateX(-50%);">
+					<div class="flex flex-col items-center">
+						<div class="bg-[#1A2B4C] text-white px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-1.5 relative border border-slate-700">
+							<span class="text-yellow-300 font-extrabold text-[13px]">📍 68점</span> 
+							<!-- 꼬리 -->
+							<div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1A2B4C] border-r border-b border-slate-700 transform rotate-45"></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 그라데이션 컬러 바 -->
+				<div class="w-full h-4 rounded-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 shadow-inner mb-2 border border-slate-200"></div>
+				
+				<!-- 바 아래의 텍스트 라벨 -->
+				<div class="flex justify-between text-[10px] sm:text-[11px] font-extrabold text-slate-500">
+					<span class="text-red-600 w-1/4 text-left">위험: 0-30</span>
+					<span class="text-orange-500 w-1/4 text-center">경고: 31-60</span>
+					<span class="text-yellow-600 w-1/4 text-center">주의: 61-80</span>
+					<span class="text-green-600 w-1/4 text-right">안전: 81-100</span>
+				</div>
+			</div>
+
+			<!-- 또래 집단 데이터 비교 (Social Proof) -->
+			<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 shadow-sm">
+				<div class="text-xs sm:text-[13px] font-bold text-slate-500 mb-3 flex items-center gap-1.5">
+					<span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[10px] sm:text-xs">Social Proof</span>
+					동일 연령대(30대 후반 여성) 평균 대비 상태:
+				</div>
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+					<div class="bg-white border border-rose-100 p-3 rounded-lg shadow-sm flex flex-col justify-center transition-colors hover:border-rose-300">
+						<span class="text-[11px] sm:text-xs text-slate-500 font-bold">수면 회복력</span>
+						<div class="text-sm sm:text-base font-extrabold text-rose-600 mt-1">
+							하위 20% 🔻
+						</div>
+					</div>
+					<div class="bg-white border border-orange-100 p-3 rounded-lg shadow-sm flex flex-col justify-center transition-colors hover:border-orange-300">
+						<span class="text-[11px] sm:text-xs text-slate-500 font-bold">스트레스 누적도</span>
+						<div class="text-sm sm:text-base font-extrabold text-orange-600 mt-1">
+							상위 15% 🔺
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 질환 도미노 예측 경로 -->
+			<div class="bg-red-50/50 border border-red-100 rounded-xl p-4 mb-4">
+				<div class="text-xs sm:text-[13px] font-extrabold text-red-600 mb-2.5 flex items-center gap-1.5">
+					⚠️ 질환 도미노 예측 경로 
+				</div>
+				<div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3 rounded-lg border border-red-50 text-[11px] sm:text-xs font-bold text-slate-700 shadow-sm gap-2 sm:gap-0">
+					<span class="bg-rose-100 text-rose-700 px-2 py-1.5 rounded text-center w-full sm:w-auto">현재(수면불량)</span>
+					<span class="text-slate-300 text-center hidden sm:block">➡️</span>
+					<span class="text-slate-300 text-center sm:hidden">⬇️</span>
+					<span class="bg-orange-100 text-orange-700 px-2 py-1.5 rounded text-center w-full sm:w-auto">3개월 후(만성 불면증)</span>
+					<span class="text-slate-300 text-center hidden sm:block">➡️</span>
+					<span class="text-slate-300 text-center sm:hidden">⬇️</span>
+					<span class="bg-red-100 text-red-700 px-2 py-1.5 rounded text-center w-full sm:w-auto">6개월 후(갱년기 우울증)</span>
+				</div>
+			</div>
+
+			<!-- 원장님의 1분 생활 처방 -->
+			<div class="mt-auto bg-indigo-50 border border-indigo-100 rounded-xl p-4 shadow-sm flex items-start gap-3 transition-colors hover:bg-indigo-100/50">
+				<div class="bg-white rounded-full p-2 shadow-sm shrink-0 border border-indigo-100">
+					<span class="text-2xl leading-none">👨‍⚕️</span>
+				</div>
+				<div>
+					<div class="font-extrabold text-[#1A2B4C] mb-1.5 text-[13px] sm:text-sm flex items-center gap-1.5">
+						원장님의 1분 생활 처방 
+					</div>
+					<p class="text-[13px] text-slate-700 leading-relaxed font-medium">
+						"새벽 2시에 심박수가 튀며 깨는 패턴이 있으니, 저녁 8시 이후 야식/카페인 금지."
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- ========================================== -->
+		<!-- 5. Widget D: 이노치노하하 브릿지 세일즈 클로징 -->
+		<!-- ========================================== -->
+		<div class="bg-white rounded-xl shadow-md p-5 sm:p-6 flex flex-col border border-slate-200 animate-slide-in hover:shadow-lg transition-shadow" style="animation-delay: 0.4s;">
+			<h2 class="text-[#1A2B4C] font-extrabold text-lg sm:text-xl mb-5 flex items-center gap-2 pb-3 border-b border-slate-100 shrink-0">
+				<span class="bg-rose-100 p-1.5 rounded-lg text-rose-600 leading-none">💡</span> 
+				AI 매칭 브릿지 처방 추천 (Top 3)
+			</h2>
+
+			<!-- AI 데이터 매칭 Top 3 리스트 UI -->
+			<div class="flex flex-col gap-3 mb-6 flex-1">
+				<!-- 1순위 (기본 활성화 상태 - 핑크색 테두리/배경) -->
+				<div class="bg-pink-50 border-2 border-pink-400 rounded-xl p-4 shadow-sm relative overflow-hidden transition-colors cursor-pointer hover:bg-pink-100 hover:border-pink-500">
+					<div class="absolute top-0 right-0 bg-pink-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">1순위 추천</div>
+					<div class="flex items-center gap-2.5 mb-1.5">
+						<span class="text-xl leading-none drop-shadow-sm">🥇</span>
+						<span class="bg-pink-200 text-pink-800 text-[11px] sm:text-xs font-extrabold px-2 py-0.5 rounded-md border border-pink-300 whitespace-nowrap">[매칭률 88%]</span>
+						<span class="font-extrabold text-slate-800 text-sm sm:text-[15px] truncate">당사 PB-A <span class="text-xs font-semibold text-slate-500 ml-1">(이노치노하하 A 베이스)</span></span>
+					</div>
+					<div class="text-[12px] sm:text-[13px] font-bold text-pink-700 pl-9 sm:pl-[38px]">안면홍조, 자율신경 타겟</div>
+				</div>
+
+				<!-- 2순위 (Hover 툴팁 포함) -->
+				<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer tooltip-trigger relative">
+					<!-- Hover Tooltip -->
+					<div class="sales-tooltip">
+						<span class="text-pink-400">💬</span> 아침에 깨고 나서 활동을 시작하는 데 시간이 꽤 걸리셨네요. 자고 일어나도 붓기가 안 빠지고 손발이 무겁고 차가우시죠?
+					</div>
+
+					<div class="flex items-center gap-2.5 mb-1.5">
+						<span class="text-xl leading-none grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all">🥈</span>
+						<span class="bg-slate-100 text-slate-600 text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-md border border-slate-200 whitespace-nowrap">[매칭률 74%]</span>
+						<span class="font-bold text-slate-700 text-sm sm:text-[15px] group-hover:text-slate-900 transition-colors truncate">당사 PB-B <span class="text-xs font-medium text-slate-400 ml-1">(이노치노하하 화이트 베이스)</span></span>
+					</div>
+					<div class="text-[12px] sm:text-[13px] font-medium text-slate-500 pl-9 sm:pl-[38px] group-hover:text-slate-600 transition-colors">하복부 뻐근함, 말초 혈행 타겟</div>
+				</div>
+
+				<!-- 3순위 (Hover 툴팁 포함) -->
+				<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer tooltip-trigger relative">
+					<!-- Hover Tooltip -->
+					<div class="sales-tooltip">
+						<span class="text-indigo-400">💬</span> 밤엔 얕게 주무시고 낮엔 아예 활동이 멈추는 구간이 많네요. 쏟아지는 졸음 때문에 낮 동안 멍하고 무기력하게 느껴지시나요?
+					</div>
+
+					<div class="flex items-center gap-2.5 mb-1.5">
+						<span class="text-xl leading-none grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all">🥉</span>
+						<span class="bg-slate-100 text-slate-600 text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-md border border-slate-200 whitespace-nowrap">[매칭률 65%]</span>
+						<span class="font-bold text-slate-700 text-sm sm:text-[15px] group-hover:text-slate-900 transition-colors truncate">당사 PB-C <span class="text-xs font-medium text-slate-400 ml-1">(가미소요산 베이스)</span></span>
+					</div>
+					<div class="text-[12px] sm:text-[13px] font-medium text-slate-500 pl-9 sm:pl-[38px] group-hover:text-slate-600 transition-colors">주간 무기력, 야간 수면 타겟</div>
+				</div>
+			</div>
+
+			<!-- 처방 전환(Upsell) 가격 비교 보드 -->
+			<div class="bg-slate-100 rounded-xl p-4 sm:p-5 mb-5 border border-slate-200 flex flex-col justify-center relative shadow-inner shrink-0">
+				<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 pb-3 border-b border-slate-300 border-dashed gap-1 sm:gap-0">
+					<span class="text-xs sm:text-sm font-bold text-slate-500 flex items-center gap-1.5">❌ 기존 맞춤 첩약</span>
+					<div class="text-left sm:text-right">
+						<span class="line-through text-slate-400 text-base sm:text-[19px] font-bold">300,000원</span>
+					</div>
+				</div>
+				
+				<div class="flex flex-col sm:flex-row sm:items-end justify-between pt-1 gap-2 sm:gap-0">
+					<div class="flex flex-col">
+						<span class="text-sm sm:text-[15px] font-black text-[#1A2B4C] flex items-center gap-1.5 mb-1.5">
+							<span class="text-pink-500">⭕</span> 선택된 [당사 PB-A]
+						</span>
+					</div>
+					<div class="text-left sm:text-right flex items-baseline gap-1">
+						<span class="text-3xl sm:text-[42px] font-black text-pink-600 tracking-tighter drop-shadow-sm leading-none">90,000</span>
+						<span class="text-lg sm:text-xl font-bold text-pink-600">원</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Call To Action 버튼 -->
+			<button class="btn-shine group w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 sm:py-4 text-[15px] sm:text-[17px] font-extrabold shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_12px_25px_rgba(37,99,235,0.5)] transition-all duration-300 transform hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 border border-blue-700 flex items-center justify-center gap-2 mt-auto shrink-0">
+				<span class="drop-shadow-md relative z-10 transition-colors">당사 PB-A 15일분 처방 전송하기</span>
+				<span class="text-xl sm:text-2xl drop-shadow-md relative z-10 group-hover:translate-x-1.5 transition-transform duration-300 leading-none">➔</span>
+			</button>
+		</div>
+
+	</main>
+
+</body>
+</html>
